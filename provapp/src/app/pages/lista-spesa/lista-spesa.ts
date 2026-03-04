@@ -1,32 +1,48 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { SpesaService } from '../../services/spesa-service';
-@Component({
-selector: 'app-lista-spesa',
-imports: [FormsModule],
-templateUrl: './lista-spesa.html',
-styleUrl: './lista-spesa.css',
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import Keycloak from 'keycloak-js';
+import { Observable } from 'rxjs';
+
+
+@Injectable({
+  providedIn: 'root',
 })
-export class ListaSpesa implements OnInit {
-private spesaService = inject(SpesaService);
-items = signal<string[]>([]);
-newItem = signal('');
-error = signal('');
-ngOnInit(): void {
-this.spesaService.getItems().subscribe({
-next: (res) => this.items.set(res.items),
-error: () => this.error.set('Errore nel caricamento della lista'),
-});
-}
-addItem(): void {
-if (!this.newItem().trim()) return;
-this.spesaService.addItem(this.newItem().trim()).subscribe({
-next: (res) => {
-this.items.set(res.items);
-this.newItem.set('');
-this.error.set('');
-},
-error: () => this.error.set("Errore durante l'aggiunta"),
-});
-}
+export class SpesaService {
+  private http = inject(HttpClient);
+  private keycloak = inject(Keycloak);
+
+  //ricordate di aprire la porta del server
+  private baseUrl = 'https://ideal-space-umbrella-q7jqpxp6x99xfpr-5000.app.github.dev'
+
+  //ci serve per allegare il token ad ogni
+  //richiesta http
+  private getHeaders(): HttpHeaders {
+    console.log('Token:', this.keycloak.token);
+    return new HttpHeaders({
+      Authorization: `Bearer ${this.keycloak.token}`,
+    });
+  }
+
+  //lista condivisa uguale per tutti gli utenti
+  getItems(): Observable<{ items: { id: number; nome: string }[] }> {
+    return this.http.get<{ items: { id: number; nome: string }[] }>(
+      `${this.baseUrl}/items`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  addItem(item: string): Observable<{ items: { id: number; nome: string }[] }> {
+    return this.http.post<{ items: { id: number; nome: string }[] }>(
+      `${this.baseUrl}/items`,
+      { item },
+      { headers: this.getHeaders() }
+    );
+  }
+
+  deleteItem(id: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/items/${id}`,
+      { headers: this.getHeaders() }
+    );
+  }
 }

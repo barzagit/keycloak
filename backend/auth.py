@@ -5,13 +5,12 @@ import requests
 
 #queti ovviamente li ho messi qua
 #per comodità, ma sapete dove vanno :)
-KEYCLOAK_URL = "https://ideal-space-umbrella-q7jqpxp6x99xfpr-8080.app.github.dev/"
+KEYCLOAK_URL = "URL KEYCLOAK SENZA LO /"
 REALM        = "prova"
 CLIENT_ID    = "provapp"
 JWKS_URL     = f"{KEYCLOAK_URL}/realms/{REALM}/protocol/openid-connect/certs"
 
-
-#scarica la chiave pubblica di Keycloak
+#scarica la chiave pubblica di Keycloak 
 #per verificare che il JWT non sia stato alterato
 def get_keycloak_public_key(token: str):
     #1)legge l'header del token SENZA verificarne la firma
@@ -19,7 +18,7 @@ def get_keycloak_public_key(token: str):
     #un identificatore che dice quale chiave pubblica usare
     unverified_header = jwt.get_unverified_header(token)
     kid = unverified_header.get("kid")
-
+    
     #2)scarica tutte le chiavi pubbliche attive dal realm di Keycloak.
     #Keycloak le ruota periodicamente, quindi possono essercene più di una.
     response = requests.get(JWKS_URL)
@@ -33,7 +32,7 @@ def get_keycloak_public_key(token: str):
 
     raise Exception("Chiave pubblica non trovata")
 
-#creiamo un nuovo decoratore
+#creiamo un nuovo decoratore 
 #@require_auth lo usiamo dopo nell'app.py
 def require_auth(f):
     @wraps(f)
@@ -82,3 +81,24 @@ def require_auth(f):
         return f(*args, **kwargs)
 
     return decorated
+
+def get_roles(payload: dict) -> list:
+    #cerca i ruoli nel jwt
+    return payload.get("realm_access", {}) \
+                  .get("roles", []) #risultato: ["user"], ["user_plus"] oppure []
+
+#decoratore che useremo nell'app.py
+#per proteggere le rotte in base al ruolo
+def require_role(role: str):
+    #riceve il ruolo 
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            #g.user esiste già perché @require_auth è passato prima
+            if role not in get_roles(g.user):
+                #ruolo non trovato 403 Forbidden
+                return jsonify({"error": "Permesso negato"}), 403
+            #ruolo trovato esegue la route normalmente
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator

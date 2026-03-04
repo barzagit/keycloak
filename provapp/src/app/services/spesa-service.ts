@@ -6,6 +6,9 @@ import { Observable } from 'rxjs';
 providedIn: 'root',
 })
 export class SpesaService {
+deleteItem(id: number) {
+    throw new Error('Method not implemented.');
+}
 private http = inject(HttpClient);
 private keycloak = inject(Keycloak);
 //ricordate di aprire la porta del server
