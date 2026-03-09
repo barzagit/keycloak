@@ -9,14 +9,14 @@ CORS(app)
 
 # Inizializzazione database
 # i valori vengono letti dalle variabili d'ambiente (fallback ai default locali)
-db = Database(
+'''db = Database(
     host=os.getenv('DB_HOST', 'mysql-1b94f8f1-iisgalvanimi-9fad.b.aivencloud.com'),
     user=os.getenv('DB_USER', 'avnadmin'),
     password=os.getenv('DB_PASS', 'AVNS_-ztvhHD8WceEzyo2TAI'),
     database=os.getenv('DB_NAME', 'defaultdb'),
     port=int(os.getenv('DB_PORT', '15180')),
     ssl_mode=os.getenv('DB_SSL_MODE'),  # es. "REQUIRED"
-)
+)'''
 
 # Crea le tabelle all'avvio
 db.create_tables()
