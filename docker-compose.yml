@@ -37,5 +37,24 @@ services:
     command:
       - start-dev
 
+  mysql:
+    image: mysql:8.0
+    container_name: registro-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: registro_elettronico
+      MYSQL_USER: registro_user
+      MYSQL_PASSWORD: registro_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   keycloak_postgres_data:
+  mysql_data:

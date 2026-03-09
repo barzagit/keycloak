@@ -1,0 +1,119 @@
+<div class="container">
+  <h1>📚 Registro Elettronico - Docente</h1>
+
+  <!-- Messaggio di errore -->
+  @if (error()) {
+    <div class="alert alert-danger">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Messaggio di successo -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+    </div>
+  }
+
+  <!-- Form per inserire voto -->
+  <div class="form-section">
+    <h2>Inserisci Voto Studente</h2>
+    <form (ngSubmit)="inserisciVoto()">
+      <div class="form-group">
+        <label>Username Studente:</label>
+        <input
+          type="text"
+          name="username"
+          [value]="newVoto().username_studente"
+          (input)="updateNewVoto('username_studente', $event.target.value)"
+          placeholder="es. mario.rossi"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Nome Studente:</label>
+        <input
+          type="text"
+          name="nome"
+          [value]="newVoto().nome_studente"
+          (input)="updateNewVoto('nome_studente', $event.target.value)"
+          placeholder="es. Mario Rossi"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Materia:</label>
+        <input
+          type="text"
+          name="materia"
+          [value]="newVoto().materia"
+          (input)="updateNewVoto('materia', $event.target.value)"
+          placeholder="es. Matematica"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Voto (0-10):</label>
+        <input
+          type="number"
+          name="voto"
+          min="0"
+          max="10"
+          [value]="newVoto().voto"
+          (input)="updateNewVoto('voto', $event.target.value)"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary">Inserisci Voto</button>
+    </form>
+  </div>
+
+  <!-- Lista voti -->
+  <div class="voti-section">
+    <h2>Tutti i Voti</h2>
+    
+    @if (loading()) {
+      <p class="loading">Caricamento...</p>
+    } @else if (voti().length === 0) {
+      <p class="no-data">Nessun voto inserito</p>
+    } @else {
+      <table class="voti-table">
+        <thead>
+          <tr>
+            <th>Studente</th>
+            <th>Username</th>
+            <th>Materia</th>
+            <th>Voto</th>
+            <th>Data</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (voto of voti(); track voto.id) {
+            <tr>
+              <td>{{ voto.nome_studente }}</td>
+              <td>{{ voto.username_studente }}</td>
+              <td>{{ voto.materia }}</td>
+              <td class="voto-cell">
+                <span class="voto-badge">{{ voto.voto }}</span>
+              </td>
+              <td>{{ voto.data_inserimento | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <button
+                  class="btn btn-danger btn-sm"
+                  (click)="eliminaVoto(voto.id)"
+                >
+                  Elimina
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

@@ -1,0 +1,72 @@
+<div class="container">
+  <h1>📊 I Miei Voti</h1>
+
+  <!-- Profilo studente -->
+  <div class="profile-card">
+    <div class="profile-header">
+      <h2>Benvenuto, {{ username() }}!</h2>
+    </div>
+
+    <!-- Media e statistiche -->
+    @if (voti().length > 0) {
+      <div class="stats">
+        <div class="stat-box">
+          <p class="stat-label">Media Voti</p>
+          <p class="stat-value">{{ calcolaMedia() }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Numero Voti</p>
+          <p class="stat-value">{{ voti().length }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Stato</p>
+          <p [ngClass]="'badge-' + getStatoBadge().classe">
+            {{ getStatoBadge().testo }}
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Messaggio di errore -->
+  @if (error()) {
+    <div class="alert alert-danger">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Lista voti -->
+  <div class="voti-section">
+    <h2>I Tuoi Voti</h2>
+
+    @if (loading()) {
+      <p class="loading">Caricamento voti...</p>
+    } @else if (voti().length === 0) {
+      <div class="no-voti">
+        <p>✨ Nessun voto ancora. Buona fortuna!</p>
+      </div>
+    } @else {
+      <!-- Raggruppamento per materia -->
+      <div class="voti-by-materia">
+        @for (materia of getMaterieUniche(); track materia) {
+          <div class="materia-group">
+            <h3>{{ materia }}</h3>
+            <div class="voti-list">
+              @for (voto of getVotiPerMateria(materia); track voto.id) {
+                <div class="voto-card">
+                  <div class="voto-valore">{{ voto.voto }}</div>
+                  <div class="voto-info">
+                    <p class="voto-docente">Prof. {{ voto.username_docente }}</p>
+                    <p class="voto-data">
+                      {{ voto.data_inserimento | date: 'dd/MM/yyyy' }}
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
